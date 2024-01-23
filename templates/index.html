@@ -2,4 +2,19 @@
 {% block title %}Home page{% endblock %}
 {% block content %}
     <h1>Quiz</h1>
+    {% if session["user"] %}
+        <p>Hello {{ session["user"] }}</p>
+        <form action="{{ url_for('start_quiz') }}">
+            <p><input type="submit" value="Begin Quiz!"></p>
+        </form>
+        <form action="{{ url_for('logout') }}">
+            <p><input type="submit" value="Logout"></p>
+        </form>
+    {% else %}
+    <form action="{{ url_for('home') }}" method="post">
+        {{ form.hidden_tag() }}
+        {{ form.name.label }} {{ form.name(size=40) }}
+        {{ form.submit }}
+    </form>
+    {% endif %}
 {% endblock %}
