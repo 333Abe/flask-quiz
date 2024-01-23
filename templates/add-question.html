@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% block title %}Question{% endblock %}
+{% block content %}
+    <h1>Add Question</h1>
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            <ul>
+                {% for category, message in messages %}
+                    <li class="{{ category }}">{{ message }}</li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+    {% endwith %}
+    <form action="{{ url_for('add_question') }}" method="post">
+        {{ form.hidden_tag() }}
+        {{ form.question.label }} {{ form.question(size=70) }}
+        {{ form.answer.label }} {{ form.answer(size=70) }}
+        {{ form.submit() }}
+    </form>
+{% endblock %}

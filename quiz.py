@@ -1,4 +1,5 @@
-from flask import Flask, render_template, request
+from flask import Flask, render_template, redirect, url_for, flash, session
+from forms import AddQuestion, StartQuiz
 from db import db, Quiz
 
 app = Flask(__name__)
@@ -6,12 +7,18 @@ app = Flask(__name__)
 # set up database
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///quiz.sqlite3'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+app.config['SECRET_KEY'] = 'my_secret_key'
 
 # initialise db with SQLAlchemy init_app function
 db.init_app(app)
 
 @app.route("/")
 def home():
+
+    form = StartQuiz()
+
+    if form.validate_on_submit():
+        session["user"] = form.name.data
     return render_template("index.html")
 
 @app.route("/question")
@@ -22,11 +29,19 @@ def question():
 def answer():
     return render_template("answer.html")
 
-@app.route("/create", methods=["POST", "GET"])
-def create():
-    if request.method == "POST":
-    
-        return render_template("create.html")
+@app.route("/add-question", methods=["POST", "GET"])
+def add_question():
+
+    form = AddQuestion()
+
+    if form.validate_on_submit():
+        new_question = Quiz(question=form.question.data, answer=form.answer.data)
+        db.session.add(new_question)
+        db.session.commit()
+        flash('Question saved!', 'success')
+        return redirect(url_for('add_question'))
+
+    return render_template("add-question.html", form=form)
 
 if __name__ == "__main__":
     with app.app_context():
