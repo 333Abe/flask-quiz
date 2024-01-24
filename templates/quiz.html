@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% block title %}Questions{% endblock %}
+{% block content %}
+    <h1>Quiz</h1>
+    <p>Question: {{ current_question_index + 1 }} of {{ number_of_questions }}</p>
+    {% if question %}
+        <form action="{{ url_for('quiz') }}" method="post">
+            <p>{{ form.hidden_tag() }}</p>
+            <p>{{ form.question.label }}: {{ question }}</p>
+            {{ form.see_answer }}
+        </form>
+    {% elif answer %}
+        <form action="{{ url_for('quiz') }}" method="post">
+            <p>{{ form.hidden_tag() }}</p>
+            <p>{{ form.answer.label }}: {{ answer }}</p>
+            {{ form.incorrect }}
+            {{ form.correct }}
+        </form>
+    {% endif %}
+{% endblock %}
