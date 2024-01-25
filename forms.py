@@ -11,11 +11,9 @@ class StartQuiz(FlaskForm):
     name = StringField('Name', validators=[DataRequired()])
     submit = SubmitField('Submit')
 
-class Question(FlaskForm):
+class QuizForm(FlaskForm):
     question = StringField('Question', render_kw={'readonly': True})
     see_answer = SubmitField('Show answer')
-
-class Answer(FlaskForm):
     answer = StringField('Answer', render_kw={'readonly': True})
     incorrect = SubmitField('I got this wrong')
     correct = SubmitField('I got this right!')

@@ -1,5 +1,5 @@
 from flask import Flask, render_template, redirect, url_for, flash, session
-from forms import AddQuestion, StartQuiz, Question, Answer
+from forms import AddQuestion, StartQuiz, QuizForm
 from db import db, Quiz
 
 app = Flask(__name__)
@@ -39,7 +39,8 @@ def start_quiz():
 
     # store questions in the session
     session['questions'] = questions_data
-    session['current_index'] = 0
+    session['current_q_index'] = 0
+    session['current_a_index'] = 0
     session['number_of_questions'] = len(questions_data)
     session['user_responses'] = []
     session['show_answer'] = False
@@ -57,16 +58,18 @@ def quiz():
         flash('Number of questions cannot be zero', 'error')
         return redirect(url_for('home'))
 
-    current_question_index = session.get('current_index')
+    current_question_index = session.get('current_q_index')
+    current_answer_index = session.get('current_a_index')
     questions = session['questions']
     show_answer = session.get('show_answer', False)
 
-    form = Question() if not show_answer else Answer()
+    form = QuizForm()
 
     # show first question
     if current_question_index == 0 and not show_answer:
         question = questions[current_question_index]['question']
         session['show_answer'] = True
+        session['current_q_index'] += 1 
         return render_template('quiz.html',
                                form=form, 
                                question=question,
@@ -75,12 +78,29 @@ def quiz():
                                )
 
     if form.validate_on_submit():
-        if current_question_index == number_of_questions:
+        # check if last question has been asked
+        if current_question_index == number_of_questions and current_answer_index == number_of_questions:
+            end_of_quiz = True
+        else:
+            end_of_quiz = False
+
+        # record answer if provided (current_question_index has been incremented so it's -1)
+        if form.incorrect.data:
+            # handle incorrect answer report
+            record_results(current_question_index - 1, False, questions[current_question_index - 1]['id'])
+        elif form.correct.data:
+            # handle correct answer report
+            record_results(current_question_index - 1, True, questions[current_question_index - 1]['id'])
+        
+        if end_of_quiz:
+            print("ending quiz")
             return redirect(url_for('results'))
+
+        # show question or answer
         if not show_answer:
-            # add answer to user_responses
             question = questions[current_question_index]['question']
             session['show_answer'] = True
+            session['current_q_index'] += 1 
             return render_template('quiz.html', 
                                    form=form, 
                                    question=question, 
@@ -88,20 +108,29 @@ def quiz():
                                    number_of_questions=number_of_questions
                                    )
         else:
-            session['current_index'] += 1
-            answer = questions[current_question_index]['answer']
+            answer = questions[current_answer_index]['answer']
             session['show_answer'] = False
+            session['current_a_index'] += 1
             return render_template('quiz.html',
                                    form=form,
                                    answer=answer,
-                                   current_question_index=current_question_index,
+                                   current_answer_index=current_answer_index,
                                    number_of_questions=number_of_questions
                                    )
 
+def record_results(current_question_index, q_response, id):
+    # appending directly i.e. session['user_responses'].append() causes a bug where the last response is not recorded
+    responses = session['user_responses']
+    responses.append({'id': id, 'index': current_question_index, 'answer_correct': q_response})
+    session['user_responses'] = responses
+    return
 
 @app.route("/results")
 def results():
-    return render_template("results.html")
+    user_responses = session['user_responses']
+    print(f"<<<  {len(session['user_responses'])} user responses in session")
+    print(session['user_responses'])
+    return render_template("results.html", user_responses=user_responses)
 
 @app.route("/add-question", methods=["POST", "GET"])
 def add_question():
