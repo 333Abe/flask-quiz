@@ -3,5 +3,17 @@
 {% block content %}
     <h1>Results</h1>
     <a href="/">return home</a>
+    <table>
+        <tr>
+            <td>Question</td>
+            <td>Response</td>
+        </tr>
+        {% for response in user_responses %}
+            <tr>
+                <td>{{ response.index + 1 }}</td>
+                <td>{{ response.answer_correct }}</td>
+            </tr>
+        {% endfor %}
+    </table>
 
 {% endblock %}
