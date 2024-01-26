@@ -4,7 +4,7 @@ from db import db, Quiz
 
 app = Flask(__name__)
 
-# set up database
+# set up database configuration
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///quiz.sqlite3'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['SECRET_KEY'] = 'my_secret_key'
@@ -13,6 +13,10 @@ app.config['SECRET_KEY'] = 'my_secret_key'
 db.init_app(app)
 
 def initialise_quiz_session():
+    """
+    Initialize the quiz session by retrieving questions from the database and storing them in the session.
+    """
+
     # get all question data from database
     questions = Quiz.query.all()
 
@@ -29,21 +33,33 @@ def initialise_quiz_session():
 
 @app.route("/", methods=["POST", "GET"])
 def home():
+    """
+    Route for the home page. Handles user login and renders the home page template.
+    """
 
     form = StartQuiz()
 
     if form.validate_on_submit():
+        # set user session variable
         session["user"] = form.name.data
 
     return render_template("index.html", form=form)
 
 @app.route("/logout")
 def logout():
+    """
+    Route for logging out. Removes the user from the session and redirects to the home page.
+    """
+
     session.pop("user", None)
     return redirect(url_for('home'))
 
 @app.route('/start-quiz')
 def start_quiz():
+    """
+    Route to start the quiz. Redirects to the quiz route after initializing the quiz session.
+    """
+
     if 'user' not in session:
         return redirect(url_for('home'))
     
@@ -53,6 +69,9 @@ def start_quiz():
 
 @app.route("/quiz", methods=["POST", "GET"])
 def quiz():
+    """
+    Route for handling the quiz. Manages quiz logic, question display, and user responses.
+    """
 
     if 'user' not in session or 'questions' not in session:
         return redirect(url_for('home'))
@@ -129,18 +148,26 @@ def quiz():
                                    )
 
 def record_results(current_question_index, q_response, id):
+    """
+    Returns a dictionary of all user reponses
+    """
     responses = session['user_responses']
     responses.append({'id': id, 'index': current_question_index, 'answer_correct': q_response})
     return responses
 
 @app.route("/results")
 def results():
+    """
+    Route for displaying the quiz results.
+    """
     user_responses = session['user_responses']
     return render_template("results.html", user_responses=user_responses)
 
 @app.route("/add-question", methods=["POST", "GET"])
 def add_question():
-
+    """
+    Route for adding a new quiz question. Handles form submission and database update.
+    """
     form = AddQuestion()
 
     if form.validate_on_submit():
