@@ -12,6 +12,21 @@ app.config['SECRET_KEY'] = 'my_secret_key'
 # initialise db with SQLAlchemy init_app function
 db.init_app(app)
 
+def initialise_quiz_session():
+    # get all question data from database
+    questions = Quiz.query.all()
+
+    # transform Quiz objects into json serialisable form (dictionary), otherwise there is an error when setting to the session
+    questions_data = [{'id': q._id, 'question': q.question, 'answer': q.answer} for q in questions]
+
+    # store questions in the session
+    session['questions'] = questions_data
+    session['current_q_index'] = 0
+    session['current_a_index'] = 0
+    session['number_of_questions'] = len(questions_data)
+    session['user_responses'] = []
+    session['show_answer'] = False
+
 @app.route("/", methods=["POST", "GET"])
 def home():
 
@@ -32,18 +47,7 @@ def start_quiz():
     if 'user' not in session:
         return redirect(url_for('home'))
     
-    questions = Quiz.query.all() # get all question data from database
-
-    # transform Quiz objects into json serialisable form (dictionaries), otherwise there is an error when setting to the session
-    questions_data = [{'id': q._id, 'question': q.question, 'answer': q.answer} for q in questions]
-
-    # store questions in the session
-    session['questions'] = questions_data
-    session['current_q_index'] = 0
-    session['current_a_index'] = 0
-    session['number_of_questions'] = len(questions_data)
-    session['user_responses'] = []
-    session['show_answer'] = False
+    initialise_quiz_session()
 
     return redirect(url_for('quiz'))
 
