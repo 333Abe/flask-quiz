@@ -70,11 +70,13 @@ def quiz():
         question = questions[current_question_index]['question']
         session['show_answer'] = True
         session['current_q_index'] += 1 
+        displayed_q_num = current_question_index + 1
         return render_template('quiz.html',
                                form=form, 
                                question=question,
                                current_question_index=current_question_index,
-                               number_of_questions=number_of_questions
+                               number_of_questions=number_of_questions,
+                               displayed_q_num=displayed_q_num
                                )
 
     if form.validate_on_submit():
@@ -101,21 +103,25 @@ def quiz():
             question = questions[current_question_index]['question']
             session['show_answer'] = True
             session['current_q_index'] += 1 
+            displayed_q_num = current_question_index + 1
             return render_template('quiz.html', 
                                    form=form, 
                                    question=question, 
                                    current_question_index=current_question_index, 
-                                   number_of_questions=number_of_questions
+                                   number_of_questions=number_of_questions,
+                                   displayed_q_num=displayed_q_num
                                    )
         else:
             answer = questions[current_answer_index]['answer']
             session['show_answer'] = False
             session['current_a_index'] += 1
+            displayed_q_num = current_answer_index + 1
             return render_template('quiz.html',
                                    form=form,
                                    answer=answer,
                                    current_answer_index=current_answer_index,
-                                   number_of_questions=number_of_questions
+                                   number_of_questions=number_of_questions,
+                                   displayed_q_num=displayed_q_num
                                    )
 
 def record_results(current_question_index, q_response, id):
