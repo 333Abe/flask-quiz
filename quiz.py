@@ -136,8 +136,6 @@ def record_results(current_question_index, q_response, id):
 @app.route("/results")
 def results():
     user_responses = session['user_responses']
-    print(f"<<<  {len(session['user_responses'])} user responses in session")
-    print(session['user_responses'])
     return render_template("results.html", user_responses=user_responses)
 
 @app.route("/add-question", methods=["POST", "GET"])
