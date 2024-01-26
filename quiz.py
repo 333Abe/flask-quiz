@@ -89,10 +89,10 @@ def quiz():
         # record answer if provided (current_question_index has been incremented so it's -1)
         if form.incorrect.data:
             # handle incorrect answer report
-            record_results(current_question_index - 1, False, questions[current_question_index - 1]['id'])
+            session['user_responses'] = record_results(current_question_index - 1, False, questions[current_question_index - 1]['id'])
         elif form.correct.data:
             # handle correct answer report
-            record_results(current_question_index - 1, True, questions[current_question_index - 1]['id'])
+            session['user_responses'] = record_results(current_question_index - 1, True, questions[current_question_index - 1]['id'])
         
         if end_of_quiz:
             print("ending quiz")
@@ -125,11 +125,9 @@ def quiz():
                                    )
 
 def record_results(current_question_index, q_response, id):
-    # appending directly i.e. session['user_responses'].append() causes a bug where the last response is not recorded
     responses = session['user_responses']
     responses.append({'id': id, 'index': current_question_index, 'answer_correct': q_response})
-    session['user_responses'] = responses
-    return
+    return responses
 
 @app.route("/results")
 def results():
