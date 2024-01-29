@@ -1,5 +1,5 @@
 from flask import Flask, render_template, redirect, url_for, flash, session, request
-from forms import AddQuestion, StartQuiz, QuizForm, DeleteQuestions
+from forms import AddQuestion, StartQuiz, QuizForm, DeleteQuestions, EditQuestion
 from db import db, Quiz
 
 app = Flask(__name__)
@@ -200,7 +200,31 @@ def add_question():
 @app.route("/edit-question", methods=["POST", "GET"])
 def edit_question():
     # edit question
-    return
+    question_id = request.form.get('question_id')
+
+    if question_id is not None:
+        session['question_id'] = int(question_id)
+    
+    question_id = session['question_id']
+
+    if question_id is None:
+        return redirect(url_for('list_questions'))
+    
+    question = Quiz.query.get_or_404(question_id)
+    form = EditQuestion()
+
+    if form.validate_on_submit():
+        question.question = form.question.data
+        question.answer = form.answer.data
+        db.session.commit()
+        flash('Question edited', 'success')
+        session.pop('question_id', None)
+        return redirect(url_for('list_questions'))
+    
+    form.question.data = question.question
+    form.answer.data = question.answer
+
+    return render_template('edit-question.html', form=form)
 
 if __name__ == "__main__":
     with app.app_context():

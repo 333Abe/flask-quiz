@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% block title %}Edit question{% endblock %}
+{% block content %}
+    <h1>Edit question</h1>
+    <form action="{{ url_for('edit_question') }}" method="post">
+        {{ form.hidden_tag() }}
+        {{ form.question.label }} {{ form.question(size=70) }}
+        {{ form.answer.label }} {{ form.answer(size=70) }}
+        {{ form.submit() }}
+    </form>
+
+{% endblock %}

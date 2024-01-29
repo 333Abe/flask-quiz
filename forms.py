@@ -20,3 +20,8 @@ class QuizForm(FlaskForm):
 
 class DeleteQuestions(FlaskForm):
     delete = SubmitField('Delete')
+
+class EditQuestion(FlaskForm):
+    question = StringField('Question', validators=[DataRequired()])
+    answer = StringField('Answer', validators=[DataRequired()])
+    submit = SubmitField('Submit')
