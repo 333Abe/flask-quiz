@@ -15,13 +15,14 @@ db.init_app(app)
 def get_questions_data():
     # get all question data from database
     questions = Quiz.query.all()
-    # transform Quiz objects into json serialisable form (dictionary), otherwise there is an error when setting to the session
+    # transform Quiz objects into json serialisable form (dictionary),
+    # otherwise there is an error when setting to the session
     questions_data = [{'id': q._id, 'question': q.question, 'answer': q.answer} for q in questions]
     return questions_data
 
 def initialise_quiz_session():
     """
-    Initialize the quiz session by retrieving questions from the database and storing them in the session.
+    Initialise the quiz session by retrieving questions from the database and storing them in the session.
     """
     questions_data = get_questions_data()
 
@@ -59,7 +60,7 @@ def logout():
 @app.route('/start-quiz')
 def start_quiz():
     """
-    Route to start the quiz. Redirects to the quiz route after initializing the quiz session.
+    Route to start the quiz. Redirects to the quiz route after initialising the quiz session.
     """
 
     if 'user' not in session:
@@ -167,6 +168,9 @@ def results():
 
 @app.route("/list-questions", methods=["POST", "GET"])
 def list_questions():
+    """
+    Route for displaying a list of quiz questions. Allows the user to delete questions.
+    """
     questions = Quiz.query.all()
     delete_forms = [DeleteQuestions(prefix=str(question._id)) for question in questions]
 
@@ -199,7 +203,9 @@ def add_question():
 
 @app.route("/edit-question", methods=["POST", "GET"])
 def edit_question():
-    # edit question
+    """
+    Route for editing an existing quiz question. Handles form submission and database update.
+    """
     question_id = request.form.get('question_id')
 
     if question_id is not None:
