@@ -17,3 +17,6 @@ class QuizForm(FlaskForm):
     answer = StringField('Answer', render_kw={'readonly': True})
     incorrect = SubmitField('I got this wrong')
     correct = SubmitField('I got this right!')
+
+class DeleteQuestions(FlaskForm):
+    delete = SubmitField('Delete')

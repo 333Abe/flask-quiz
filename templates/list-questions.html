@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% block title %}Questions{% endblock %}
+{% block content %}
+<h1>Questions</h1>
+<a href="{{ url_for('add_question') }}">Add Question</a>
+{% for question in questions %}
+<p>{{ question.question }}</p>
+    <form action="{{ url_for('list_questions') }}" method="post">
+        {{ delete_forms[loop.index0].hidden_tag() }}
+        {{ delete_forms[loop.index0].delete }}
+    </form>
+    <form action="{{ url_for('edit_question') }}" method="post">
+        <input type="hidden" name="quesiton_id" value="{{ question._id }}">
+        <button type="submit">Edit</button>
+    </form>
+{% endfor %}
+{% endblock %}

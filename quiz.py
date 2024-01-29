@@ -1,5 +1,5 @@
-from flask import Flask, render_template, redirect, url_for, flash, session
-from forms import AddQuestion, StartQuiz, QuizForm
+from flask import Flask, render_template, redirect, url_for, flash, session, request
+from forms import AddQuestion, StartQuiz, QuizForm, DeleteQuestions
 from db import db, Quiz
 
 app = Flask(__name__)
@@ -12,16 +12,18 @@ app.config['SECRET_KEY'] = 'my_secret_key'
 # initialise db with SQLAlchemy init_app function
 db.init_app(app)
 
+def get_questions_data():
+    # get all question data from database
+    questions = Quiz.query.all()
+    # transform Quiz objects into json serialisable form (dictionary), otherwise there is an error when setting to the session
+    questions_data = [{'id': q._id, 'question': q.question, 'answer': q.answer} for q in questions]
+    return questions_data
+
 def initialise_quiz_session():
     """
     Initialize the quiz session by retrieving questions from the database and storing them in the session.
     """
-
-    # get all question data from database
-    questions = Quiz.query.all()
-
-    # transform Quiz objects into json serialisable form (dictionary), otherwise there is an error when setting to the session
-    questions_data = [{'id': q._id, 'question': q.question, 'answer': q.answer} for q in questions]
+    questions_data = get_questions_data()
 
     # store questions in the session
     session['questions'] = questions_data
@@ -163,6 +165,22 @@ def results():
     user_responses = session['user_responses']
     return render_template("results.html", user_responses=user_responses)
 
+@app.route("/list-questions", methods=["POST", "GET"])
+def list_questions():
+    questions = Quiz.query.all()
+    delete_forms = [DeleteQuestions(prefix=str(question._id)) for question in questions]
+
+    if request.method == 'POST':
+        # check for submitted delete forms
+        for question, delete_form in zip(questions, delete_forms):
+            if delete_form.delete.data and delete_form.validate:
+                db.session.delete(question)
+                db.session.commit()
+                flash('Question deleted', 'success')
+                return redirect(url_for('list_questions'))
+
+    return render_template("list-questions.html", delete_forms=delete_forms, questions=questions)
+
 @app.route("/add-question", methods=["POST", "GET"])
 def add_question():
     """
@@ -178,6 +196,11 @@ def add_question():
         return redirect(url_for('add_question'))
 
     return render_template("add-question.html", form=form)
+
+@app.route("/edit-question", methods=["POST", "GET"])
+def edit_question():
+    # edit question
+    return
 
 if __name__ == "__main__":
     with app.app_context():
