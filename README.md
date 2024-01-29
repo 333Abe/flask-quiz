@@ -5,14 +5,16 @@ This project is a simple quiz application built with Flask, SQLAlchemy, and WTFo
 ## Features
 
 - User authentication and login
-- Quiz initialization and management
+- Quiz initialisation and management
 - Recording user responses
 - Displaying quiz results
 - Adding new quiz questions
+- Deleting questions
+- Editing questions
 
 ## Project Structure
 
-- `app.py`: Main application file.
+- `quiz.py`: Main application file.
 - `forms.py`: Form classes using WTForms for user input.
 - `db.py`: Database configuration and models using SQLAlchemy.
 - `templates/`: HTML templates for rendering views.
