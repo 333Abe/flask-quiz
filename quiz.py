@@ -121,7 +121,6 @@ def quiz():
             session['user_responses'] = record_results(current_question_index - 1, True, questions[current_question_index - 1]['id'])
         
         if end_of_quiz:
-            print("ending quiz")
             return redirect(url_for('results'))
 
         # show question or answer
